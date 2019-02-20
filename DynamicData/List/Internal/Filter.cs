@@ -37,6 +37,7 @@ namespace DynamicData.List.Internal
             return Observable.Create<IChangeSet<T>>(observer =>
             {
                 var locker = new object();
+                bool hasSubscribed = false;
                 
                 Func<T, bool> predicate = t => false;
                 var all = new List<ItemWithMatch>();
@@ -57,12 +58,13 @@ namespace DynamicData.List.Internal
                         .Select(newPredicate =>
                         {
                             predicate = newPredicate;
-                            return Requery(predicate, all, filtered);
-                        });
+                            return Requery(predicate, all, filtered, hasSubscribed);
+                        })
+                        .Where(changes => changes != null); 
                 }
 
                 /*
-                 * Apply the transform operator so 'IsMatch' state can be evalutated and captured one time only
+                 * Apply the transform operator so 'IsMatch' state can be evaluated and captured one time only
                  * This is to eliminate the need to re-apply the predicate when determining whether an item was previously matched,
                  * which is essential when we have mutable state
                  */
@@ -79,11 +81,13 @@ namespace DynamicData.List.Internal
                     {
                         //keep track of all changes if filtering on an observable
                         if (!immutableFilter) all.Clone(changes);
+
                         return Process(filtered, changes);
-                    });
+                    })
+                    .Where(changes => !hasSubscribed || (hasSubscribed && changes.Count !=0))
+                    .Do(_=> hasSubscribed = true);
                 
                 return predicateChanged.Merge(filteredResult)
-                            .NotEmpty()
                             .Select(changes => changes.Transform(iwm => iwm.Item)) // use convert, not transform
                             .SubscribeSafe(observer);
             });
@@ -91,6 +95,9 @@ namespace DynamicData.List.Internal
 
         private IChangeSet<ItemWithMatch> Process(ChangeAwareList<ItemWithMatch> filtered, IChangeSet<ItemWithMatch> changes)
         {
+            if (changes.Count == 0)
+                return ChangeSet<ItemWithMatch>.Empty;
+
             //Maintain all items as well as filtered list. This enables us to a) requery when the predicate changes b) check the previous state when Refresh is called
             foreach (var item in changes)
             {
@@ -182,13 +189,13 @@ namespace DynamicData.List.Internal
                         break;
                     }
                 }
-
             }
             return filtered.CaptureChanges();
         }
 
-        private IChangeSet<ItemWithMatch> Requery(Func<T, bool> predicate, List<ItemWithMatch> all, ChangeAwareList<ItemWithMatch> filtered)
+        private IChangeSet<ItemWithMatch> Requery(Func<T, bool> predicate, List<ItemWithMatch> all, ChangeAwareList<ItemWithMatch> filtered, bool hasSubscribed)
         {
+            if (!hasSubscribed) return null;
             if (all.Count == 0) return ChangeSet<ItemWithMatch>.Empty;
 
             if (_policy == ListFilterPolicy.ClearAndReplace)

@@ -27,27 +27,27 @@ namespace DynamicData.Tests.List
                 list.AddRange(items);
 
                 results.Data.Count.Should().Be(100);
-                results.Messages.Count.Should().Be(1);
+                results.Messages.Count.Should().Be(2);
 
                 items[0].Age = 10;
                 results.Data.Count.Should().Be(100);
-                results.Messages.Count.Should().Be(2);
+                results.Messages.Count.Should().Be(3);
 
-                results.Messages[1].First().Reason.Should().Be(ListChangeReason.Refresh);
+                results.Messages[2].First().Reason.Should().Be(ListChangeReason.Refresh);
 
                 //remove an item and check no change is fired
                 var toRemove = items[1];
                 list.Remove(toRemove);
                 results.Data.Count.Should().Be(99);
-                results.Messages.Count.Should().Be(3);
+                results.Messages.Count.Should().Be(4);
                 toRemove.Age = 100;
-                results.Messages.Count.Should().Be(3);
+                results.Messages.Count.Should().Be(4);
 
                 //add it back in and check it updates
                 list.Add(toRemove);
-                results.Messages.Count.Should().Be(4);
-                toRemove.Age = 101;
                 results.Messages.Count.Should().Be(5);
+                toRemove.Age = 101;
+                results.Messages.Count.Should().Be(6);
 
                 results.Messages.Last().First().Reason.Should().Be(ListChangeReason.Refresh);
             }
@@ -69,7 +69,7 @@ namespace DynamicData.Tests.List
                 list.AddRange(items);
 
                 results.Data.Count.Should().Be(100);
-                results.Messages.Count.Should().Be(1);
+                results.Messages.Count.Should().Be(2);
                 
                 //update 50 records
                 items.Skip(50)
@@ -78,8 +78,8 @@ namespace DynamicData.Tests.List
                 scheduler.AdvanceBy(TimeSpan.FromSeconds(1).Ticks);
 
                 //should be another message with 50 refreshes
-                results.Messages.Count.Should().Be(2);
-                results.Messages[1].Refreshes.Should().Be(50);
+                results.Messages.Count.Should().Be(3);
+                results.Messages[2].Refreshes.Should().Be(50);
             }
         }
 
@@ -97,13 +97,13 @@ namespace DynamicData.Tests.List
                 list.AddRange(items);
 
                 results.Data.Count.Should().Be(50);
-                results.Messages.Count.Should().Be(1);
+                results.Messages.Count.Should().Be(2);
 
                 //update an item which did not match the filter and does so after change
                 items[0].Age = 60;
                 results.Data.Count.Should().Be(51);
-                results.Messages.Count.Should().Be(2);
-                results.Messages[1].First().Reason.Should().Be(ListChangeReason.Add);
+                results.Messages.Count.Should().Be(3);
+                results.Messages[2].First().Reason.Should().Be(ListChangeReason.Add);
 
                 //check for removes
                 items[0].Age = 21;
@@ -114,22 +114,22 @@ namespace DynamicData.Tests.List
                 //update an item which matched the filter and still does [refresh should have propagated]
                 items[60].Age = 160;
                 results.Data.Count.Should().Be(51);
-                results.Messages.Count.Should().Be(5);
+                results.Messages.Count.Should().Be(6);
                 results.Messages.Last().First().Reason.Should().Be(ListChangeReason.Refresh);
 
                 //remove an item and check no change is fired
                 var toRemove = items[65];
                 list.Remove(toRemove);
                 results.Data.Count.Should().Be(50);
-                results.Messages.Count.Should().Be(6);
+                results.Messages.Count.Should().Be(7);
                 toRemove.Age = 100;
-                results.Messages.Count.Should().Be(6);
+                results.Messages.Count.Should().Be(7);
 
                 //add it back in and check it updates
                 list.Add(toRemove);
-                results.Messages.Count.Should().Be(7);
-                toRemove.Age = 101;
                 results.Messages.Count.Should().Be(8);
+                toRemove.Age = 101;
+                results.Messages.Count.Should().Be(9);
 
 
 
@@ -154,17 +154,17 @@ namespace DynamicData.Tests.List
                 list.AddRange(items);
 
                 results.Data.Count.Should().Be(100);
-                results.Messages.Count.Should().Be(1);
+                results.Messages.Count.Should().Be(2);
 
                 //update an item which did not match the filter and does so after change
                 items[0].Age = 60;
-                results.Messages.Count.Should().Be(2);
+                results.Messages.Count.Should().Be(3);
                 results.Messages.Last().Refreshes.Should().Be(1);
                 results.Messages.Last().First().Item.Reason.Should().Be(ListChangeReason.Refresh);
                 results.Messages.Last().First().Item.Current.Index.Should().Be(0);
 
                 items[60].Age = 160;
-                results.Messages.Count.Should().Be(3);
+                results.Messages.Count.Should().Be(4);
                 results.Messages.Last().Refreshes.Should().Be(1);
                 results.Messages.Last().First().Item.Reason.Should().Be(ListChangeReason.Refresh);
                 results.Messages.Last().First().Item.Current.Index.Should().Be(60);

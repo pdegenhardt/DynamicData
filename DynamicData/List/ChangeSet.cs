@@ -177,7 +177,7 @@ namespace DynamicData
         /// </returns>
         public override string ToString()
         {
-            return $"ChangeSet<{typeof(T).Name}>. Count={Count}";
+            return $"ChangeSet<{typeof(T).Name}>. TotalChanges={TotalChanges}";
         }
     }
 }

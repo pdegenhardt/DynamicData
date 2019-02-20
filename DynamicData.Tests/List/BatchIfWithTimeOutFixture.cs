@@ -43,7 +43,7 @@ namespace DynamicData.Tests.List
 
             //go forward an arbitary amount of time
             // _scheduler.AdvanceBy(TimeSpan.FromMinutes(1).Ticks);
-            _results.Messages.Count.Should().Be(1, "There should be no messages");
+            _results.Messages.Count.Should().Be(2);
         }
 
         [Fact]
@@ -55,7 +55,7 @@ namespace DynamicData.Tests.List
 
             _source.Add(new Person("A", 1));
 
-            _results.Messages.Count.Should().Be(0, "There should be no messages");
+            _results.Messages.Count.Should().Be(1);
         }
 
         [Fact]
@@ -65,7 +65,7 @@ namespace DynamicData.Tests.List
 
             //go forward an arbitary amount of time
             _scheduler.AdvanceBy(TimeSpan.FromMinutes(1).Ticks);
-            _results.Messages.Count.Should().Be(1, "Should be 1 update");
+            _results.Messages.Count.Should().Be(2);
         }
 
         [Fact]
@@ -78,14 +78,14 @@ namespace DynamicData.Tests.List
             _source.Add(new Person("A", 1));
 
             //go forward an arbitary amount of time
-            _results.Messages.Count.Should().Be(0, "There should be no messages");
+            _results.Messages.Count.Should().Be(1);
 
             _pausingSubject.OnNext(false);
             _scheduler.AdvanceBy(TimeSpan.FromMilliseconds(10).Ticks);
 
             _source.Add(new Person("B", 1));
 
-            _results.Messages.Count.Should().Be(2, "There should be no messages");
+            _results.Messages.Count.Should().Be(3);
         }
     }
 }

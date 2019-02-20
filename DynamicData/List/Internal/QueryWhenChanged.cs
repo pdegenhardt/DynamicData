@@ -21,8 +21,10 @@ namespace DynamicData.List.Internal
                 {
                     list.Clone(changes);
                     return list;
-                }
-            ).Select(list => new ReadOnlyCollectionLight<T>(list));
+                })
+                  .Select(list => new ReadOnlyCollectionLight<T>(list))
+                  .Where(list => list.Count!=0)
+                ;
         }
     }
 }

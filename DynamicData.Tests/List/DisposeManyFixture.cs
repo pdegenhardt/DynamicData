@@ -28,7 +28,6 @@ namespace DynamicData.Tests.List
         {
             _source.Add(new DisposableObject(1));
 
-            _results.Messages.Count.Should().Be(1, "Should be 1 updates");
             _results.Data.Count.Should().Be(1, "Should be 1 item in the cache");
             _results.Data.Items.First().IsDisposed.Should().Be(false, "Should not be disposed");
         }
@@ -39,9 +38,9 @@ namespace DynamicData.Tests.List
             _source.Add(new DisposableObject(1));
             _source.RemoveAt(0);
 
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
+            _results.Messages.Count.Should().Be(3);
             _results.Data.Count.Should().Be(0, "Should be 0 items in the cache");
-            _results.Messages[1].First().Item.Current.IsDisposed.Should().Be(true, "Should be disposed");
+            _results.Messages[2].First().Item.Current.IsDisposed.Should().Be(true, "Should be disposed");
         }
 
         [Fact]
@@ -50,10 +49,10 @@ namespace DynamicData.Tests.List
             _source.Add(new DisposableObject(1));
             _source.ReplaceAt(0, new DisposableObject(1));
 
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
+            _results.Messages.Count.Should().Be(3);
             _results.Data.Count.Should().Be(1, "Should be 1 items in the cache");
-            _results.Messages[1].First().Item.Current.IsDisposed.Should().Be(false, "Current should not be disposed");
-            _results.Messages[1].First().Item.Previous.Value.IsDisposed.Should().Be(true, "Previous should be disposed");
+            _results.Messages[2].First().Item.Current.IsDisposed.Should().Be(false, "Current should not be disposed");
+            _results.Messages[2].First().Item.Previous.Value.IsDisposed.Should().Be(true, "Previous should be disposed");
         }
 
         [Fact]
@@ -63,9 +62,9 @@ namespace DynamicData.Tests.List
             _source.AddRange(toadd);
             _source.Clear();
 
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
+            _results.Messages.Count.Should().Be(3);
 
-            var itemsCleared = _results.Messages[1].First().Range;
+            var itemsCleared = _results.Messages[2].First().Range;
             itemsCleared.All(d => d.IsDisposed).Should().BeTrue();
         }
 

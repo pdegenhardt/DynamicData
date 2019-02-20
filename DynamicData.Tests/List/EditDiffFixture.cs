@@ -47,7 +47,7 @@ namespace DynamicData.Tests.List
 
             _cache.Count.Should().Be(10);
             _cache.Items.ShouldAllBeEquivalentTo(newPeople);
-            _result.Messages.Count.Should().Be(1);
+            _result.Messages.Count.Should().Be(2);
         }
 
         [Fact]
