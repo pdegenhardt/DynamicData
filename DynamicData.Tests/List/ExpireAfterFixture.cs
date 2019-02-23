@@ -66,9 +66,9 @@ namespace DynamicData.Tests.List
             _scheduler.AdvanceBy(TimeSpan.FromMilliseconds(200).Ticks);
             remover.Dispose();
 
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
-            _results.Messages[0].Adds.Should().Be(1, "Should be 1 adds in the first update");
-            _results.Messages[1].Removes.Should().Be(1, "Should be 1 removes in the second update");
+            _results.Messages.Count.Should().Be(3);
+            _results.Messages[1].Adds.Should().Be(1);
+            _results.Messages[2].Removes.Should().Be(1);
         }
 
         [Fact]
@@ -85,11 +85,11 @@ namespace DynamicData.Tests.List
 
             _scheduler.AdvanceBy(TimeSpan.FromMilliseconds(200).Ticks);
             remover.Dispose();
-            _results.Data.Count.Should().Be(0, "Should be no data in the cache");
-            _results.Messages.Count.Should().Be(3, "Should be 3 updates");
-            _results.Messages[0].Adds.Should().Be(1, "Should be 1 add in the first message");
-            _results.Messages[1].Replaced.Should().Be(1, "Should be 1 update in the second message");
-            _results.Messages[2].Removes.Should().Be(1, "Should be 1 remove in the 3rd message");
+            _results.Data.Count.Should().Be(0);
+            _results.Messages.Count.Should().Be(4);
+            _results.Messages[1].Adds.Should().Be(1, "Should be 1 add in the first message");
+            _results.Messages[2].Replaced.Should().Be(1, "Should be 1 update in the second message");
+            _results.Messages[3].Removes.Should().Be(1, "Should be 1 remove in the 3rd message");
         }
 
         [Fact]
@@ -104,9 +104,9 @@ namespace DynamicData.Tests.List
             remover.Dispose();
 
             _results.Data.Count.Should().Be(0, "Should be no data in the cache");
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
-            _results.Messages[0].Adds.Should().Be(100, "Should be 100 adds in the first message");
-            _results.Messages[1].Removes.Should().Be(100, "Should be 100 removes in the second message");
+            _results.Messages.Count.Should().Be(3, "Should be 2 updates");
+            _results.Messages[1].Adds.Should().Be(100, "Should be 100 adds in the first message");
+            _results.Messages[2].Removes.Should().Be(100, "Should be 100 removes in the second message");
         }
     }
 }

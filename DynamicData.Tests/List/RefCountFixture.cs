@@ -46,7 +46,7 @@ namespace DynamicData.Tests.List
             suscriber2.Dispose();
             suscriber3.Dispose();
 
-            created.Should().Be(1);
+            created.Should().Be(2);
             disposals.Should().Be(1);
         }
 

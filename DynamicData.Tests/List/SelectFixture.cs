@@ -37,9 +37,9 @@ namespace DynamicData.Tests.List
             var person = new Person("Adult1", 50);
             _source.Add(person);
 
-            _results.Messages.Count.Should().Be(1, "Should be 1 updates");
-            _results.Data.Count.Should().Be(1, "Should be 1 item in the cache");
-            _results.Data.Items.First().Should().Be(_transformFactory(person), "Should be same person");
+            _results.MessageCount().Should().Be(2);
+            _results.DataCount().Should().Be(1);
+            _results.Data.Items.First().Should().Be(_transformFactory(person));
         }
 
         [Fact]
@@ -51,11 +51,10 @@ namespace DynamicData.Tests.List
             _source.Add(person);
             _source.Remove(person);
 
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
-            _results.Messages[0].Adds.Should().Be(1, "Should be 80 addes");
-            _results.Messages[1].Removes.Should().Be(1, "Should be 80 removes");
-            _results.Data.Count.Should().Be(0, "Should be nothing cached");
+            _results.MessageCount().Should().Be(3);
+            _results.NumberOfAdds().Should().Be(1);
+            _results.NumberOfRemoves().Should().Be(1);
+            _results.DataCount().Should().Be(0);
         }
 
         [Fact]
@@ -68,9 +67,9 @@ namespace DynamicData.Tests.List
             _source.Add(newperson);
             _source.Add(updated);
 
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
-            _results.Messages[0].Adds.Should().Be(1, "Should be 1 adds");
-            _results.Messages[0].Replaced.Should().Be(0, "Should be 1 update");
+            _results.MessageCount().Should().Be(3);
+            _results.NumberOfAdds().Should().Be(2);
+            _results.DataCount().Should().Be(2);
         }
 
         [Fact]
@@ -80,11 +79,11 @@ namespace DynamicData.Tests.List
 
             _source.AddRange(people);
 
-            _results.Messages.Count.Should().Be(1, "Should be 1 updates");
-            _results.Messages[0].Adds.Should().Be(100, "Should return 100 adds");
+            _results.MessageCount().Should().Be(2);
+            _results.NumberOfAdds().Should().Be(100);
+            _results.DataCount().Should().Be(100);
 
-            var transformed = people.Select(_transformFactory).OrderBy(p => p.Age).ToArray();
-            _results.Data.Items.OrderBy(p => p.Age).ShouldAllBeEquivalentTo(_results.Data.Items.OrderBy(p => p.Age), "Incorrect transform result");
+            _results.Items().OrderBy(p => p.Age).ShouldAllBeEquivalentTo(_results.Data.Items.OrderBy(p => p.Age));
         }
 
         [Fact]
@@ -94,23 +93,25 @@ namespace DynamicData.Tests.List
 
             _source.AddRange(people);
 
-            _results.Messages.Count.Should().Be(1, "Should be 1 updates");
-            _results.Messages[0].Adds.Should().Be(10, "Should return 10 adds");
-            _results.Data.Count.Should().Be(10, "Should result in 10 records");
+
+            _results.MessageCount().Should().Be(2);
+            _results.NumberOfAdds().Should().Be(10);
+            _results.DataCount().Should().Be(10);
         }
 
         [Fact]
         public void Clear()
         {
-            var people = Enumerable.Range(1, 100).Select(l => new Person("Name" + l, l)).ToArray();
+            var people = Enumerable.Range(1, 10).Select(l => new Person("Name" + l, l)).ToArray();
 
             _source.AddRange(people);
             _source.Clear();
 
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
-            _results.Messages[0].Adds.Should().Be(100, "Should be 80 addes");
-            _results.Messages[1].Removes.Should().Be(100, "Should be 80 removes");
-            _results.Data.Count.Should().Be(0, "Should be nothing cached");
+
+            _results.MessageCount().Should().Be(3);
+            _results.NumberOfAdds().Should().Be(10);
+            _results.NumberOfRemoves().Should().Be(10);
+            _results.DataCount().Should().Be(0);
         }
     }
 }
