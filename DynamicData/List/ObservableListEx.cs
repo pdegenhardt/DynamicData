@@ -998,7 +998,7 @@ namespace DynamicData
             return source.Publish(shared =>
             {
                 var first = shared.Take(1).Concat(Observable.Empty<IChangeSet<T>>());
-                var subsequent = shared.Skip(1).NotEmpty();
+                var subsequent = shared.Skip(1).Where(s => s.Count != 0);
                 return first.Merge(subsequent);
             });
         }

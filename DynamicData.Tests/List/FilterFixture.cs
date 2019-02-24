@@ -93,8 +93,7 @@ namespace DynamicData.Tests.List
             var person = new Person("Adult1", 10);
             _source.Add(person);
 
-            //TODO: RP - This should be a count on 1?
-            _results.MessageCount().Should().Be(2);
+            _results.MessageCount().Should().Be(1);
             _results.DataCount().Should().Be(0);
         }
 
@@ -226,7 +225,7 @@ namespace DynamicData.Tests.List
             _source.Add(newperson);
             _source.Add(updated);
 
-            _results.MessageCount().Should().Be(3);
+            _results.MessageCount().Should().Be(1);
             _results.NumberOfAdds().Should().Be(0);
             _results.NumberOfRemoves().Should().Be(0);
             _results.DataCount().Should().Be(0);
