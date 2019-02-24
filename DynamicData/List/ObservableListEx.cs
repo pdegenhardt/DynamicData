@@ -985,12 +985,22 @@ namespace DynamicData
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="source">The source.</param>
+        /// <param name="allowEmptyInitialNotification"></param>
         /// <returns></returns>
         /// <exception cref="System.ArgumentNullException">source</exception>
-        public static IObservable<IChangeSet<T>> NotEmpty<T>(this IObservable<IChangeSet<T>> source)
+        public static IObservable<IChangeSet<T>> NotEmpty<T>(this IObservable<IChangeSet<T>> source, bool allowEmptyInitialNotification = false)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
-            return source.Where(s => s.Count != 0);
+
+            if (!allowEmptyInitialNotification)
+                return source.Where(s => s.Count != 0);
+
+            return source.Publish(shared =>
+            {
+                var first = shared.Take(1).Concat(Observable.Empty<IChangeSet<T>>());
+                var subsequent = shared.Skip(1).NotEmpty();
+                return first.Merge(subsequent);
+            });
         }
 
         /// <summary>

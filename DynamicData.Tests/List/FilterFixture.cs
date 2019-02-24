@@ -154,8 +154,7 @@ namespace DynamicData.Tests.List
             Person[] people = Enumerable.Range(1, 100).Select(l => new Person("Name" + l, l)).ToArray();
             foreach (var person in people)
             {
-                Person person1 = person;
-                _source.Add(person1);
+                _source.Add(person);
             }
 
             //TODO: THIS NEEDS FIXING

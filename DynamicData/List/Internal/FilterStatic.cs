@@ -24,7 +24,8 @@ namespace DynamicData.List.Internal
                     Process(state, changes);
                     return state;
                 })
-                .Select(filtered => filtered.CaptureChanges());
+                .Select(filtered => filtered.CaptureChanges())
+                .NotEmpty(allowEmptyInitialNotification: true);
         }
 
         private void Process(ChangeAwareList<T> filtered, IChangeSet<T> changes)
