@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using DynamicData.Binding;
@@ -447,6 +448,47 @@ namespace DynamicData.Tests.List
             public override int GetHashCode()
             {
                 return Id;
+            }
+        }
+
+        [Fact]
+        public void MakeSelectMagicWorkWithObservable()
+        {
+            var initialItem = new IntHolder() { Value = 1, Description = "Initial Description" };
+
+            var sourceList = new SourceList<IntHolder>();
+            sourceList.Add(initialItem);
+
+            var descriptionStream = sourceList
+                .Connect()
+                .AutoRefresh(intHolder => intHolder.Description)
+                .Transform(intHolder => intHolder.Description, true)
+                .Do(x => { }) // <--- Add break point here to check the overload fixes it
+                .Bind(out ReadOnlyObservableCollection<string> resultCollection);
+
+            int i = 0;
+            using (descriptionStream.Subscribe())
+            {
+                initialItem.Description = "New Description";
+            }
+
+            resultCollection[0].Should().Be("New Description");
+        }
+
+        public class IntHolder : AbstractNotifyPropertyChanged
+        {
+            public int _value;
+            public int Value
+            {
+                get => _value;
+                set => this.SetAndRaise(ref _value, value);
+            }
+
+            public string _description_;
+            public string Description
+            {
+                get => _description_;
+                set => this.SetAndRaise(ref _description_, value);
             }
         }
     }

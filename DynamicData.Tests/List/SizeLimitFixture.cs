@@ -40,9 +40,9 @@ namespace DynamicData.Tests.List
 
             _scheduler.AdvanceBy(TimeSpan.FromMilliseconds(150).Ticks);
 
-            _results.Messages.Count.Should().Be(1, "Should be 1 updates");
-            _results.Data.Count.Should().Be(1, "Should be 1 item in the cache");
-            _results.Data.Items.First().Should().Be(person, "Should be same person");
+            _results.MessageCount().Should().Be(2);
+            _results.DataCount().Should().Be(1);
+            _results.Items().First().Should().Be(person);
         }
 
         [Fact]
@@ -53,10 +53,11 @@ namespace DynamicData.Tests.List
             _scheduler.AdvanceBy(TimeSpan.FromMilliseconds(50).Ticks);
 
             _source.Dispose();
-            _results.Data.Count.Should().Be(10, "Should be 10 items in the cache");
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
-            _results.Messages[0].Adds.Should().Be(100, "Should be 100 adds in the first update");
-            _results.Messages[1].Removes.Should().Be(90, "Should be 90 removes in the second update");
+            _results.DataCount().Should().Be(10);
+            
+            _results.MessageCount().Should().Be(3);
+            _results.NumberOfAdds().Should().Be(100);
+            _results.NumberOfRemoves().Should().Be(90);
         }
 
         [Fact]
@@ -66,11 +67,11 @@ namespace DynamicData.Tests.List
             _source.AddRange(_generator.Take(10).ToArray());
 
             _scheduler.AdvanceBy(TimeSpan.FromMilliseconds(50).Ticks);
-            _results.Data.Count.Should().Be(10, "Should be 10 items in the cache");
-            _results.Messages.Count.Should().Be(3, "Should be 3 updates");
-            _results.Messages[0].Adds.Should().Be(10, "Should be 10 adds in the first update");
-            _results.Messages[1].Adds.Should().Be(10, "Should be 10 adds in the second update");
-            _results.Messages[2].Removes.Should().Be(10, "Should be 10 removes in the third update");
+
+            _results.DataCount().Should().Be(10);
+            _results.MessageCount().Should().Be(4);
+            _results.NumberOfAdds().Should().Be(20);
+            _results.NumberOfRemoves().Should().Be(10);
         }
 
         [Fact]
@@ -79,9 +80,8 @@ namespace DynamicData.Tests.List
             var person = _generator.Take(1).First();
             _source.Add(person);
 
-            _results.Messages.Count.Should().Be(1, "Should be 1 updates");
-            _results.Data.Count.Should().Be(1, "Should be 1 item in the cache");
-            _results.Data.Items.First().Should().Be(person, "Should be same person");
+            _results.DataCount().Should().Be(1);
+            _results.MessageCount().Should().Be(2);
         }
 
         [Fact]

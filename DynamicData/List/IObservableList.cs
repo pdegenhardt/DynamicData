@@ -14,11 +14,11 @@ namespace DynamicData
         /// Connect to the observable list and observe any changes
         /// starting with the list's initial items. 
         /// </summary>
-        /// <param name="predicate">The result will be filtered on the specfied predicate.</param>
+        /// <param name="predicate">The result will be filtered on the specified predicate.</param>
         IObservable<IChangeSet<T>> Connect(Func<T, bool> predicate = null);
 
         /// <summary>
-        /// Observe the count changes, starting with the inital items count
+        /// Observe the count changes, starting with the initial items count
         /// </summary>
         IObservable<int> CountChanged { get; }
 

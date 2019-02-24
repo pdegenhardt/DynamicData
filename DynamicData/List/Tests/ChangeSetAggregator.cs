@@ -56,6 +56,11 @@ namespace DynamicData.Tests
             return self.Messages.Count;
         }
 
+        public static IChangeSet<TObject> LastMessage<TObject>(this ChangeSetAggregator<TObject> self)
+        {
+            return self.Messages.Last();
+        }
+
     }
 
     /// <summary>

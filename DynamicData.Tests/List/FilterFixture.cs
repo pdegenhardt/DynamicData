@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using DynamicData.Tests.Domain;
 using Xunit;
@@ -81,9 +82,9 @@ namespace DynamicData.Tests.List
             _source.Clear();
 
             _results.MessageCount().Should().Be(3);
-            _results.Messages[1].First().Reason.Should().Be(ListChangeReason.AddRange, "First reason should be add range");
-            _results.Messages[2].First().Reason.Should().Be(ListChangeReason.Clear, "Second reason should be clear");
-            _results.DataCount().Should().Be(0, "Should be 50 item in the cache");
+            _results.Messages[1].First().Reason.Should().Be(ListChangeReason.AddRange);
+            _results.Messages[2].First().Reason.Should().Be(ListChangeReason.Clear);
+            _results.DataCount().Should().Be(0);
         }
 
         [Fact]
@@ -92,6 +93,7 @@ namespace DynamicData.Tests.List
             var person = new Person("Adult1", 10);
             _source.Add(person);
 
+            //TODO: RP - This should be a count on 1?
             _results.MessageCount().Should().Be(2);
             _results.DataCount().Should().Be(0);
         }
@@ -128,9 +130,9 @@ namespace DynamicData.Tests.List
 
             _source.AddRange(people);
             _results.MessageCount().Should().Be(2);
-            _results.Messages[1].Adds.Should().Be(80);
+            _results.NumberOfAdds().Should().Be(80);
 
-            _results.Items().OrderBy(p => p.Age).ShouldAllBeEquivalentTo(_results.Data.Items.OrderBy(p => p.Age));
+            AssetItems(people);
         }
 
         [Fact]
@@ -149,17 +151,23 @@ namespace DynamicData.Tests.List
         [Fact]
         public void BatchSuccessiveUpdates()
         {
-            var people = Enumerable.Range(1, 100).Select(l => new Person("Name" + l, l)).ToArray();
+            Person[] people = Enumerable.Range(1, 100).Select(l => new Person("Name" + l, l)).ToArray();
             foreach (var person in people)
             {
                 Person person1 = person;
                 _source.Add(person1);
             }
+
             //TODO: THIS NEEDS FIXING
             _results.MessageCount().Should().Be(81);
             _results.DataCount().Should().Be(80);
 
-            _results.Items().OrderBy(p => p.Age).ShouldAllBeEquivalentTo(_results.Data.Items.OrderBy(p => p.Age));
+            AssetItems(people);
+        }
+
+        private void AssetItems(IEnumerable<Person> people)
+        {
+            _results.Items().OrderBy(p => p.Age).ShouldAllBeEquivalentTo(people.Where(p => p.Age > 20).OrderBy(p => p.Age));
         }
 
         [Fact]
@@ -220,7 +228,9 @@ namespace DynamicData.Tests.List
             _source.Add(updated);
 
             _results.MessageCount().Should().Be(3);
-            _results.DataCount().Should().Be(2);
+            _results.NumberOfAdds().Should().Be(0);
+            _results.NumberOfRemoves().Should().Be(0);
+            _results.DataCount().Should().Be(0);
         }
 
         [Fact]

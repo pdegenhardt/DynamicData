@@ -83,7 +83,7 @@ namespace DynamicData
                     _removes = _removes + item.Range.Count;
                     break;
                 case ListChangeReason.Refresh:
-                    _removes = _refreshes++;
+                     _refreshes++;
                     break;
                 case ListChangeReason.Moved:
                     _moves++;
@@ -131,10 +131,6 @@ namespace DynamicData
         /// </summary>
         public int Refreshes => _refreshes;
 
-        /// <summary>
-        ///     Gets the number of requeries
-        /// </summary>
-        public int Evaluates => 0;
 
         /// <summary>
         ///     Gets the number of moves
@@ -149,7 +145,7 @@ namespace DynamicData
         /// <summary>
         ///     The total number if individual item changes
         /// </summary>
-        public int TotalChanges => Adds + Removes + Replaced + Moves;
+        public int TotalChanges => Adds + Removes + Replaced + Moves + Refreshes;
 
         #region Enumeration
 
