@@ -625,6 +625,27 @@ namespace DynamicData
             return new FilterOnProperty<TObject, TProperty>(source, propertySelector, predicate, propertyChangedThrottle, scheduler).Run();
         }
 
+        /// <summary>
+        /// Filters source on the specified observable property using the specified predicate.
+        /// 
+        /// The filter will automatically reapply when a property changes 
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="source">The source.</param>
+        /// <param name="objectFilterObservable">The filter property selector. When the observable changes the filter will be re-evaluated</param>
+        /// <param name="propertyChangedThrottle">The property changed throttle.</param>
+        /// <param name="scheduler">The scheduler used when throttling</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// </exception>
+        public static IObservable<IChangeSet<TObject>> FilterOnObservable<TObject>(this IObservable<IChangeSet<TObject>> source,
+            Func<TObject, IObservable<bool>> objectFilterObservable,
+            TimeSpan? propertyChangedThrottle = null,
+            IScheduler scheduler = null)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            return new FilterOnObservable<TObject>(source, objectFilterObservable, propertyChangedThrottle, scheduler).Run();
+        }
 
         /// <summary>
         /// Reverse sort of the changset
@@ -964,12 +985,22 @@ namespace DynamicData
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="source">The source.</param>
+        /// <param name="allowEmptyInitialNotification"></param>
         /// <returns></returns>
         /// <exception cref="System.ArgumentNullException">source</exception>
-        public static IObservable<IChangeSet<T>> NotEmpty<T>(this IObservable<IChangeSet<T>> source)
+        public static IObservable<IChangeSet<T>> NotEmpty<T>(this IObservable<IChangeSet<T>> source, bool allowEmptyInitialNotification = false)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
-            return source.Where(s => s.Count != 0);
+
+            if (!allowEmptyInitialNotification)
+                return source.Where(s => s.Count != 0);
+
+            return source.Publish(shared =>
+            {
+                var first = shared.Take(1).Concat(Observable.Empty<IChangeSet<T>>());
+                var subsequent = shared.Skip(1).Where(s => s.Count != 0);
+                return first.Merge(subsequent);
+            });
         }
 
         /// <summary>

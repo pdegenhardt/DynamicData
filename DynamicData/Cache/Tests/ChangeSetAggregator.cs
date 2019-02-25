@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using DynamicData.Diagnostics;
@@ -7,6 +8,19 @@ using DynamicData.Diagnostics;
 // ReSharper disable once CheckNamespace
 namespace DynamicData.Tests
 {
+    public static class ChangeSetAggregatorEx
+    {
+        //public static int Count<TObject, TKey>(this ChangeSetAggregator<TObject, TKey> self, Func<IChangeSet, int> totalSelector)
+        //{
+        //    return self.Messages
+        //}
+
+        public static int ChangeCount<TObject, TKey>(this ChangeSetAggregator<TObject, TKey> self,  Func<IChangeSet, int> totalSelector)
+        {
+            return self.Messages.Select(totalSelector).Sum();
+        }
+    }
+
     /// <summary>
     /// Aggregates all events and statistics for a changeset to help assertions when testing
     /// </summary>

@@ -106,7 +106,8 @@ namespace DynamicData
             {
                 lock (_locker)
                 {
-                    if (_readerWriter.Count == 0)
+                    var count = _readerWriter.Count;
+                    if (count == 0)
                     {
                         observer.OnNext(ChangeSet<T>.Empty);
                     }

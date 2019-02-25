@@ -39,13 +39,13 @@ namespace DynamicData.Tests.List
             var people = Enumerable.Range(1, 100).Select(i => new Person("P" + i, i)).ToList();
 
             _source.AddRange(people);
-            _results.Data.Count.Should().Be(80, "Should be 80 people in the cache");
+            _results.DataCount().Should().Be(80);
 
             _filter.OnNext(p => p.Age <= 50);
-            _results.Data.Count.Should().Be(50, "Should be 50 people in the cache");
-            _results.Messages.Count.Should().Be(2, "Should be 2 update messages");
+            _results.DataCount().Should().Be(50, "Should be 50 people in the cache");
+            _results.MessageCount().Should().Be(3);
 
-            _results.Data.Items.All(p => p.Age <= 50).Should().BeTrue();
+            _results.Items().All(p => p.Age <= 50).Should().BeTrue();
         }
 
         [Fact]
@@ -55,7 +55,7 @@ namespace DynamicData.Tests.List
             var people = Enumerable.Range(1, 100).Select(i => new Person("P" + i, i)).ToArray();
 
             _source.AddRange(people);
-            _results.Data.Count.Should().Be(80, "Should be 80 people in the cache");
+            _results.DataCount().Should().Be(80);
 
             foreach (var person in people)
             {
@@ -63,10 +63,9 @@ namespace DynamicData.Tests.List
             }
             _filter.OnNext(_filter.Value);
 
-            _results.Data.Count.Should().Be(90, "Should be 90 people in the cache");
-            _results.Messages.Count.Should().Be(2, "Should be 2 update messages");
-            _results.Messages[1].Removes.Should().Be(0, "Should be 80 removes in the second message");
-            _results.Messages[1].Adds.Should().Be(10, "Should be 10 adds in the second message");
+            _results.DataCount().Should().Be(90);
+            _results.MessageCount().Should().Be(3);
+            _results.NumberOfAdds().Should().Be(90);
 
             foreach (var person in people)
             {
@@ -74,8 +73,7 @@ namespace DynamicData.Tests.List
             }
             _filter.OnNext(_filter.Value);
 
-            _results.Data.Count.Should().Be(80, "Should be 80 people in the cache");
-            _results.Messages.Count.Should().Be(3, "Should be 3 update messages");
+            _results.DataCount().Should().Be(80);
         }
 
         [Fact]
@@ -126,7 +124,7 @@ namespace DynamicData.Tests.List
             person.Age = 10;
             _filter.OnNext(_filter.Value);
 
-            captureList.Should().BeEquivalentTo(new[] {1, 0});
+            captureList.Should().BeEquivalentTo(new[] {0, 1, 0});
         }
 
         #region Static filter tests
@@ -139,9 +137,11 @@ namespace DynamicData.Tests.List
             var person = new Person("Adult1", 50);
             _source.Add(person);
 
-            _results.Messages.Count.Should().Be(1, "Should be 1 updates");
-            _results.Data.Count.Should().Be(1, "Should be 1 item in the cache");
-            _results.Data.Items.First().Should().Be(person, "Should be same person");
+            _results.MessageCount().Should().Be(2);
+            _results.NumberOfAdds().Should().Be(1);
+            _results.DataCount().Should().Be(1);
+
+            _results.Items().First().Should().Be(person);
         }
 
         [Fact]
@@ -150,8 +150,8 @@ namespace DynamicData.Tests.List
             var person = new Person("Adult1", 10);
             _source.Add(person);
 
-            _results.Messages.Count.Should().Be(0, "Should have no item updates");
-            _results.Data.Count.Should().Be(0, "Cache should have no items");
+            _results.MessageCount().Should().Be(1);
+            _results.DataCount().Should().Be(0);
         }
 
         [Fact]
@@ -167,16 +167,18 @@ namespace DynamicData.Tests.List
                 updater.Add(matched);
             });
 
-            _results.Messages.Count.Should().Be(1, "Should be 1 updates");
-            _results.Messages[0].First().Range.First().Should().Be(matched, "Should be same person");
-            _results.Data.Items.First().Should().Be(matched, "Should be same person");
+
+            _results.MessageCount().Should().Be(2);
+            _results.Messages[1].First().Range.First().Should().Be(matched);
+            _results.Data.Items.First().Should().Be(matched);
         }
 
         [Fact]
         public void AttemptedRemovalOfANonExistentKeyWillBeIgnored()
         {
-            _source.Remove(new Person("A", 1));
-            _results.Messages.Count.Should().Be(0, "Should be 0 updates");
+            _source.Remove(new Person("anyone", 1));
+            _results.NumberOfRemoves().Should().Be(0);
+            _results.MessageCount().Should().Be(1);
         }
 
         [Fact]
@@ -185,11 +187,10 @@ namespace DynamicData.Tests.List
             var people = Enumerable.Range(1, 100).Select(i => new Person("Name" + i, i)).ToArray();
 
             _source.AddRange(people);
-            _results.Messages.Count.Should().Be(1, "Should be 1 updates");
-            _results.Messages[0].Adds.Should().Be(80, "Should return 80 adds");
+            _results.MessageCount().Should().Be(2);
+            _results.NumberOfAdds().Should().Be(80);
 
-            var filtered = people.Where(p => p.Age > 20).OrderBy(p => p.Age).ToArray();
-            _results.Data.Items.OrderBy(p => p.Age).ShouldAllBeEquivalentTo(_results.Data.Items.OrderBy(p => p.Age), "Incorrect Filter result");
+            _results.Items().OrderBy(p => p.Age).ShouldAllBeEquivalentTo(people.Where(p => p.Age > 20).OrderBy(p => p.Age));
         }
 
         [Fact]
@@ -200,10 +201,10 @@ namespace DynamicData.Tests.List
             _source.AddRange(people);
             _source.Clear();
 
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
-            _results.Messages[0].Adds.Should().Be(80, "Should be 80 addes");
-            _results.Messages[1].Removes.Should().Be(80, "Should be 80 removes");
-            _results.Data.Count.Should().Be(0, "Should be nothing cached");
+            _results.MessageCount().Should().Be(3);
+            _results.NumberOfAdds().Should().Be(80);
+            _results.NumberOfRemoves().Should().Be(80);
+            _results.DataCount().Should().Be(0);
         }
 
         [Fact]
@@ -214,12 +215,14 @@ namespace DynamicData.Tests.List
             {
                 Person person1 = person;
                 _source.Add(person1);
-            }
 
-            _results.Messages.Count.Should().Be(80, "Should be 80 messages");
-            _results.Data.Count.Should().Be(80, "Should be 80 in the cache");
-            var filtered = people.Where(p => p.Age > 20).OrderBy(p => p.Age).ToArray();
-            _results.Data.Items.OrderBy(p => p.Age).ShouldAllBeEquivalentTo(_results.Data.Items.OrderBy(p => p.Age), "Incorrect Filter result");
+            }
+  
+
+            _results.MessageCount().Should().Be(81);
+            _results.DataCount().Should().Be(80);
+            
+            _results.Items().OrderBy(p => p.Age).ShouldAllBeEquivalentTo(people.Where(p => p.Age > 20).OrderBy(p => p.Age));
         }
 
         [Fact]
@@ -229,10 +232,10 @@ namespace DynamicData.Tests.List
             _source.AddRange(people);
             _source.Clear();
 
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
-            _results.Messages[0].Adds.Should().Be(80, "Should be 80 addes");
-            _results.Messages[1].Removes.Should().Be(80, "Should be 80 removes");
-            _results.Data.Count.Should().Be(0, "Should be nothing cached");
+            _results.MessageCount().Should().Be(3);
+            _results.Messages[1].First().Reason.Should().Be(ListChangeReason.AddRange);
+            _results.Messages[2].First().Reason.Should().Be(ListChangeReason.Clear);
+            _results.DataCount().Should().Be(0);
         }
 
         [Fact]
@@ -244,11 +247,10 @@ namespace DynamicData.Tests.List
             _source.Add(person);
             _source.Remove(person);
 
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
-            _results.Messages[0].Adds.Should().Be(1, "Should be 80 addes");
-            _results.Messages[1].Removes.Should().Be(1, "Should be 80 removes");
-            _results.Data.Count.Should().Be(0, "Should be nothing cached");
+            _results.MessageCount().Should().Be(3);
+            _results.NumberOfAdds().Should().Be(1);
+            _results.NumberOfRemoves().Should().Be(1);
+            _results.DataCount().Should().Be(0);
         }
 
         [Fact]
@@ -261,9 +263,9 @@ namespace DynamicData.Tests.List
             _source.Add(newperson);
             _source.Replace(newperson, updated);
 
-            _results.Messages.Count.Should().Be(2, "Should be 2 updates");
-            _results.Messages[0].Adds.Should().Be(1, "Should be 1 adds");
-            _results.Messages[1].Replaced.Should().Be(1, "Should be 1 update");
+
+            _results.MessageCount().Should().Be(3);
+            _results.DataCount().Should().Be(1);
         }
 
         [Fact]
@@ -279,22 +281,24 @@ namespace DynamicData.Tests.List
                 //    updater.Remove(key);
             });
 
-            _results.Messages.Count.Should().Be(1, "Should be 1 updates");
-            _results.Messages[0].Adds.Should().Be(3, "Should be 3 adds");
+            _results.MessageCount().Should().Be(2);
+            _results.NumberOfAdds().Should().Be(3);
         }
 
         [Fact]
         public void UpdateNotMatched()
         {
             const string key = "Adult1";
-            var newperson = new Person(key, 10);
-            var updated = new Person(key, 11);
+            var notamatch = new Person(key, 10);
+            var stillNotAMatch = new Person(key, 11);
 
-            _source.Add(newperson);
-            _source.Replace(newperson, updated);
+            _source.Add(notamatch);
+            _source.Replace(notamatch, stillNotAMatch);
 
-            _results.Messages.Count.Should().Be(0, "Should be no updates");
-            _results.Data.Count.Should().Be(0, "Should nothing cached");
+            _results.MessageCount().Should().Be(1);
+            _results.NumberOfAdds().Should().Be(0);
+            _results.NumberOfRemoves().Should().Be(0);
+            _results.DataCount().Should().Be(0);
         }
 
         #endregion

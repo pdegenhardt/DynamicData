@@ -32,6 +32,9 @@ namespace DynamicData.Binding
         /// <param name="changes">The changes.</param>
         public void Adapt(IChangeSet<T> changes)
         {
+            if (changes.TotalChanges == 0)
+                return;
+
             if (changes.TotalChanges - changes.Refreshes > _refreshThreshold || !_loaded)
             {
                 using (_collection.SuspendNotifications())
