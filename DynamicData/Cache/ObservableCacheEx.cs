@@ -70,37 +70,24 @@ namespace DynamicData
         }
 
         /// <summary>
-        /// Supresses updates which are empty
+        /// Prevents empty notifications.
         /// </summary>
-        /// <typeparam name="TObject">The type of the object.</typeparam>
-        /// <typeparam name="TKey">The type of the key.</typeparam>
         /// <param name="source">The source.</param>
-        /// <returns></returns>
+        /// <param name="allowEmptyInitialNotification"></param>
         /// <exception cref="System.ArgumentNullException">source</exception>
-        public static IObservable<IChangeSet<TObject, TKey>> NotEmpty<TObject, TKey>(this IObservable<IChangeSet<TObject, TKey>> source)
+        public static IObservable<IChangeSet<TObject, TKey>> NotEmpty<TObject, TKey>(this IObservable<IChangeSet<TObject, TKey>> source, bool allowEmptyInitialNotification = true)
         {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            return source.Where(changes => changes.Count != 0);
-        }
-
-        /// <summary>
-        /// Supresses updates which are empty. However it will produce a notification for the first change.
-        /// </summary>
-        /// <typeparam name="TObject">The type of the object.</typeparam>
-        /// <typeparam name="TKey">The type of the key.</typeparam>
-        /// <param name="source">The source.</param>
-        /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException">source</exception>
-        internal static IObservable<IChangeSet<TObject, TKey>> NotEmpty_Experiment<TObject, TKey>(this IObservable<IChangeSet<TObject, TKey>> source)
-        {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (!allowEmptyInitialNotification)
+                return source.Where(s => s.Count != 0);
 
             return source.Publish(shared =>
             {
-                return shared.Take(1)
-                    .Merge(shared.Skip(1).Where(changes => changes.Count != 0));
+                var first = shared.Take(1).Concat(Observable.Never<IChangeSet<TObject, TKey>>());
+                var subsequent = shared.Skip(1).Where(s => s.Count != 0);
+                return first.Merge(subsequent);
             });
         }
+
 
         /// <summary>
         /// Flattens an update collection to it's individual items
@@ -108,10 +95,8 @@ namespace DynamicData
         /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <typeparam name="TKey">The type of the key.</typeparam>
         /// <param name="source">The source.</param>
-        /// <returns></returns>
         /// <exception cref="System.ArgumentNullException">source</exception>
-        public static IObservable<Change<TObject, TKey>> Flatten<TObject, TKey>(
-            this IObservable<IChangeSet<TObject, TKey>> source)
+        public static IObservable<Change<TObject, TKey>> Flatten<TObject, TKey>(this IObservable<IChangeSet<TObject, TKey>> source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             return source.SelectMany(changes => changes);
@@ -497,7 +482,7 @@ namespace DynamicData
             return source.Select(updates =>
             {
                 return new ChangeSet<TObject, TKey>(updates.Where(u => hashed.Contains(u.Reason)));
-            }).NotEmpty();
+            });
         }
 
         /// <summary>
@@ -520,7 +505,7 @@ namespace DynamicData
             return source.Select(updates =>
             {
                 return new ChangeSet<TObject, TKey>(updates.Where(u => !hashed.Contains(u.Reason)));
-            }).NotEmpty();
+            });
         }
 
         #endregion

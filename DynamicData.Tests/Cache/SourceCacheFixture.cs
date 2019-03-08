@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
+using DynamicData.Cache.Tests;
 using DynamicData.Tests.Domain;
 using FluentAssertions;
 using Xunit;
@@ -40,7 +41,7 @@ namespace DynamicData.Tests.Cache
                 updater.Refresh(torequery);
             });
 
-            _results.Summary.Overall.Count.Should().Be(6, "Should be  6 up`dates");
+            _results.TotalChangeCount().Should().Be(6);
             _results.Messages.Count.Should().Be(1, "Should be 1 message");
             _results.Messages[0].Adds.Should().Be(1, "Should be 1 update");
             _results.Messages[0].Updates.Should().Be(3, "Should be 3 updates");

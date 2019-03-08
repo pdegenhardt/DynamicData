@@ -9,7 +9,7 @@ using Xunit;
 namespace DynamicData.Tests.Cache
 {
     
-    public class TransformSafeFixture: IDisposable
+    public class  TransformSafeFixture: IDisposable
     {
         private ISourceCache<Person, string> _source;
         private ChangeSetAggregator<PersonWithGender, string> _results;

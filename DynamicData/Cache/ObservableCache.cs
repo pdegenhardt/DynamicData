@@ -116,7 +116,7 @@ namespace DynamicData
                     var initial = GetInitialUpdates(predicate);
                     var changes = Observable.Return(initial).Concat(_changes);
 
-                    return (predicate == null ? changes : changes.Filter(predicate)).NotEmpty();
+                    return (predicate == null ? changes : changes.Filter(predicate)). NotEmpty();
                 }
             });
         }

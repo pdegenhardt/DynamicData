@@ -1,26 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using DynamicData.Diagnostics;
 
 // ReSharper disable once CheckNamespace
 namespace DynamicData.Tests
 {
-    public static class ChangeSetAggregatorEx
-    {
-        //public static int Count<TObject, TKey>(this ChangeSetAggregator<TObject, TKey> self, Func<IChangeSet, int> totalSelector)
-        //{
-        //    return self.Messages
-        //}
-
-        public static int ChangeCount<TObject, TKey>(this ChangeSetAggregator<TObject, TKey> self,  Func<IChangeSet, int> totalSelector)
-        {
-            return self.Messages.Select(totalSelector).Sum();
-        }
-    }
-
     /// <summary>
     /// Aggregates all events and statistics for a changeset to help assertions when testing
     /// </summary>
@@ -40,15 +25,13 @@ namespace DynamicData.Tests
 
             Data = published.AsObservableCache();
 
-            var results = published.Subscribe(updates => Messages.Add(updates), ex => Error = ex);
-            var summariser = published.CollectUpdateStats().Subscribe(summary => Summary = summary);
+            var results = published.Subscribe(updates => Messages.Add(updates));
             var connected = published.Connect();
 
             _disposer = Disposable.Create(() =>
             {
                 Data.Dispose();
                 connected.Dispose();
-                summariser.Dispose();
                 results.Dispose();
             });
         }
@@ -69,21 +52,6 @@ namespace DynamicData.Tests
         /// </value>
         public IList<IChangeSet<TObject, TKey>> Messages { get; } = new List<IChangeSet<TObject, TKey>>();
 
-        /// <summary>
-        /// Gets the summary.
-        /// </summary>
-        /// <value>
-        /// The summary.
-        /// </value>
-        public ChangeSummary Summary { get; private set; } = ChangeSummary.Empty;
-
-        /// <summary>
-        /// Gets the error.
-        /// </summary>
-        /// <value>
-        /// The error.
-        /// </value>
-        public Exception Error { get; private set; }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using DynamicData.List.Tests;
 
 namespace DynamicData.Tests.List
 {

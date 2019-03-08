@@ -38,8 +38,7 @@ namespace DynamicData.Cache.Internal
                 //create change set of items where force refresh is applied
                 var refresher = _forceTransform.Synchronize(locker)
                     .Select(selector => CaptureChanges(cache, selector))
-                    .Select(changes => new ChangeSet<TSource, TKey>(changes))
-                    .NotEmpty();
+                    .Select(changes => new ChangeSet<TSource, TKey>(changes));
 
                 var sourceAndRefreshes = shared.Merge(refresher);
 

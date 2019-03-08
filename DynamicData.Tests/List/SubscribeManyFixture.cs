@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reactive.Disposables;
+using DynamicData.List.Tests;
 using FluentAssertions;
 using Xunit;
 

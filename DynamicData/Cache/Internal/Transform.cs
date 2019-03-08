@@ -81,8 +81,7 @@ namespace DynamicData.Cache.Internal
                     }
                     return cache;
                 })
-                .Select(cache => cache.CaptureChanges())
-                .NotEmpty();
+                .Select(cache => cache.CaptureChanges());
         }
     }
 }

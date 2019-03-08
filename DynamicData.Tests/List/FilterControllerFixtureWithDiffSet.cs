@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reactive.Subjects;
+using DynamicData.List.Tests;
 using DynamicData.Tests.Domain;
 using Xunit;
 using FluentAssertions;

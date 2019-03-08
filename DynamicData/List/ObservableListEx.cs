@@ -981,7 +981,7 @@ namespace DynamicData
         }
 
         /// <summary>
-        /// Prevents an empty notification
+        /// Prevents empty notifications.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="source">The source.</param>
@@ -997,7 +997,7 @@ namespace DynamicData
 
             return source.Publish(shared =>
             {
-                var first = shared.Take(1).Concat(Observable.Empty<IChangeSet<T>>());
+                var first = shared.Take(1).Concat(Observable.Never<IChangeSet<T>>());
                 var subsequent = shared.Skip(1).Where(s => s.Count != 0);
                 return first.Merge(subsequent);
             });

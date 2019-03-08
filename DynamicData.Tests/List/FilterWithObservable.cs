@@ -7,8 +7,7 @@ using DynamicData.Tests.Domain;
 using Xunit;
 using System.Collections.Generic;
 using FluentAssertions;
-using DynamicData.Alias;
-
+using DynamicData.List.Tests;
 
 
 namespace DynamicData.Tests.List
