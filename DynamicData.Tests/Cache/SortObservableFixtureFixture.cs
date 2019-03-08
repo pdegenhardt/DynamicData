@@ -107,7 +107,7 @@ namespace DynamicData.Tests.Cache
         [Fact]
         public void InlineChanges()
         {
-            var people = _generator.Take(10000).ToArray();
+            var people = _generator.Take(10).ToArray();
             _cache.AddOrUpdate(people);
 
             //apply mutable changes to the items
