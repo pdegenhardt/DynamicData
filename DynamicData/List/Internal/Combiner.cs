@@ -80,6 +80,7 @@ namespace DynamicData.List.Internal
 
         private IChangeSet<T> UpdateResultList(IChangeSet<T> changes, List<ReferenceCountTracker<T>> sourceLists, ChangeAwareListWithRefCounts<T> resultList)
         {
+
             //child caches have been updated before we reached this point.
             foreach (var change in changes.Flatten())
             {
@@ -106,19 +107,24 @@ namespace DynamicData.List.Internal
             switch (_type)
             {
                 case CombineOperator.And:
-                    {
-                        return sourceLists.All(s => s.Contains(item));
-                    }
+                {
+                    if (sourceLists.Count == 1) return false;
+                    return sourceLists.All(s => s.Contains(item));
+                }
                 case CombineOperator.Or:
                     {
+                        if (sourceLists.Count == 1) return true;
                         return sourceLists.Any(s => s.Contains(item));
                     }
                 case CombineOperator.Xor:
                     {
+                        if (sourceLists.Count == 1) return false;
                         return sourceLists.Count(s => s.Contains(item)) == 1;
                     }
                 case CombineOperator.Except:
                     {
+                        if (sourceLists.Count == 1) return true;
+
                         var first = sourceLists[0].Contains(item);
                         var others = sourceLists.Skip(1).Any(s => s.Contains(item));
                         return first && !others;

@@ -450,18 +450,19 @@ namespace DynamicData.Tests.List
         }
 
         [Fact]
-        public void RefreshTransformAsList()
+        public void TestRefreshTransformAsList()
         {
-            SourceList<Example> list = new SourceList<Example>();
-            var valueList = list.Connect()
+            using (SourceList<Example> list = new SourceList<Example>())
+            using (var valueList = list.Connect()
                 .AutoRefresh(e => e.Value)
                 .Transform(e => e.Value, true)
-                .AsObservableList();
-
-            var obj = new Example { Value = 0 };
-            list.Add(obj);
-            obj.Value = 1;
-            valueList.Items.First().Should().Be(1);
+                .AsObservableList())
+            {
+                var obj = new Example {Value = 0};
+                list.Add(obj);
+                obj.Value = 1;
+                valueList.Items.First().Should().Be(1);
+            }
         }
 
         private class Example : AbstractNotifyPropertyChanged

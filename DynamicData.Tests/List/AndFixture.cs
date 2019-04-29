@@ -6,7 +6,60 @@ using Xunit;
 
 namespace DynamicData.Tests.List
 {
-    
+
+    public class AndBug
+    {
+
+        [Fact]
+        public void Cache()
+        {
+            var list1 = new SourceCache<int, int>(i => i);
+            var list2 = new SourceCache<int, int>(i => i);
+
+            list1.AddOrUpdate(1);
+            list1.AddOrUpdate(2);
+            list1.AddOrUpdate(3);
+
+            list2.AddOrUpdate(3);
+            list2.AddOrUpdate(4);
+            list2.AddOrUpdate(5);
+
+            var and = list1.Connect().And(list2.Connect()).AsObservableCache();
+
+            and.Connect().ToCollection().Subscribe((l) =>
+            {
+                Console.WriteLine($"[{string.Join(", ", l)}]"); // Produces "[1, 2, 3]", expected "[3]"
+            });
+        }
+
+        [Fact]
+        public void List()
+        {
+            var list1 = new SourceList<int>();
+            var list2 = new SourceList<int>();
+
+            list1.Add(1);
+            list1.Add(2);
+            list1.Add(3);
+
+            list2.Add(3);
+            list2.Add(4);
+            list2.Add(5);
+
+            var and = list1.Connect().And(list2.Connect()).AsObservableList();
+
+            and.Connect().ToCollection().Subscribe((l) =>
+            {
+                Console.WriteLine($"[{string.Join(", ", l)}]"); // Produces "[1, 2, 3]", expected "[3]"
+            });
+
+            list1.Add(4);
+            list2.Remove(3);
+        }
+
+    }
+
+
     public class AndFixture : AndFixtureBase
     {
         protected override IObservable<IChangeSet<int>> CreateObservable()
